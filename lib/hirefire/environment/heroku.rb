@@ -31,7 +31,7 @@ module HireFire
           if @@last_checked.nil? || @@workers_cache.nil? || @@last_checked < 5.minutes.ago
             HireFire::Logger.message("get workers: Heroku API")
             @@last_checked = Time.now
-            @@workers_cache = @client.formation.list(ENV['APP_NAME']).select{|p| p["type"] == "worker"}.sum{|p| p["quantity"]}
+            @@workers_cache = client.formation.list(ENV['APP_NAME']).select{|p| p["type"] == "worker"}.sum{|p| p["quantity"]}
             return @@workers_cache
           else
             HireFire::Logger.message("get workers: Cache")
@@ -46,7 +46,7 @@ module HireFire
         @@last_checked = Time.now
         @@workers_cache = amount
         HireFire::Logger.message("set workers: Heroku API -> #{amount}")
-        return @client.formation.update(ENV['APP_NAME'], "worker",{:quantity=>amount,:size=>"1X"})
+        return client.formation.update(ENV['APP_NAME'], "worker",{:quantity=>amount,:size=>"1X"})
 
       rescue => e
         # Heroku library uses rest-client, currently, and it is quite
