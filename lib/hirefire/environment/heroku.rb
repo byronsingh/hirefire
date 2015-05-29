@@ -6,6 +6,9 @@ module HireFire
   module Environment
     class Heroku < Base
 
+      @@workers_cache = nil
+      @@last_checked = nil
+
       private
 
       ##
@@ -24,13 +27,26 @@ module HireFire
         # Returns the amount of Delayed Job
         # workers that are currently running on Heroku
         if amount.nil?
-          return client.info(ENV['APP_NAME'])[:workers].to_i
+          #return client.info(ENV['APP_NAME'])[:workers].to_i
+          if @@last_checked.nil? || @@workers_cache.nil? || @@last_checked < 5.minutes.ago
+            HireFire::Logger.message("get workers: Heroku API")
+            @@last_checked = Time.now
+            @@workers_cache = @client.formation.list(ENV['APP_NAME']).select{|p| p["type"] == "worker"}.sum{|p| p["quantity"]}
+            return @@workers_cache
+          else
+            HireFire::Logger.message("get workers: Cache")
+            return @@workers_cache
+          end
         end
 
         ##
         # Sets the amount of Delayed Job
         # workers that need to be running on Heroku
-        client.set_workers(ENV['APP_NAME'], amount)
+        #client.set_workers(ENV['APP_NAME'], amount)
+        @@last_checked = Time.now
+        @@workers_cache = amount
+        HireFire::Logger.message("set workers: Heroku API -> #{amount}")
+        return @client.formation.update(ENV['APP_NAME'], "worker",{:quantity=>amount,:size=>"1X"})
 
       rescue RestClient::Exception
         # Heroku library uses rest-client, currently, and it is quite
@@ -42,9 +58,10 @@ module HireFire
       ##
       # @return [Heroku::Client] instance of the heroku client
       def client
-        @client ||= ::Heroku::Client.new(
-          ENV['HIREFIRE_EMAIL'], ENV['HIREFIRE_PASSWORD']
-        )
+        #@client ||= ::Heroku::Client.new(
+        #  ENV['HIREFIRE_EMAIL'], ENV['HIREFIRE_PASSWORD']
+        #)
+        @client ||= PlatformAPI.connect(ENV['HEROKU_API_KEY'])
       end
 
     end
