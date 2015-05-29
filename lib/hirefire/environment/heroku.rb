@@ -48,10 +48,10 @@ module HireFire
         HireFire::Logger.message("set workers: Heroku API -> #{amount}")
         return @client.formation.update(ENV['APP_NAME'], "worker",{:quantity=>amount,:size=>"1X"})
 
-      rescue RestClient::Exception
+      rescue => e
         # Heroku library uses rest-client, currently, and it is quite
         # possible to receive RestClient exceptions through the client.
-        HireFire::Logger.message("Worker query request failed with #{ $!.class.name } #{ $!.message }")
+        HireFire::Logger.message("Worker query request failed with #{ e.class.name } #{ e.message }")
         nil
       end
 
