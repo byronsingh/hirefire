@@ -5,7 +5,7 @@ source 'http://rubygems.org'
 ##
 # Define gems to be used in the 'test' environment
 group :test do
-  gem 'heroku'
+  gem 'platform-api'
   gem 'rush'
   gem 'rspec'
   gem 'mocha'

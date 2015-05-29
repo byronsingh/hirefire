@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'heroku'
+#require 'heroku'
 
 module HireFire
   module Environment
