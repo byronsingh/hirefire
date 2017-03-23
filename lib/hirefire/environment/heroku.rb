@@ -46,7 +46,7 @@ module HireFire
         @@last_checked = Time.now
         @@workers_cache = amount
         HireFire::Logger.message("set workers: Heroku API -> #{amount}")
-        return client.formation.update(ENV['APP_NAME'], "worker",{:quantity=>amount,:size=>"1X"})
+        return client.formation.update(ENV['APP_NAME'], "worker",{:quantity=>amount,:size=>"Standard-1X"})
 
       rescue => e
         # Heroku library uses rest-client, currently, and it is quite
